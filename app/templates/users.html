@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">Users</h1>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Invite User</h5>
+        <form method="post">
+          <div class="mb-2">
+            <label class="form-label">Name</label>
+            <input class="form-control" type="text" name="name" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Email</label>
+            <input class="form-control" type="email" name="email" required />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Role</label>
+            <select class="form-select" name="role">
+              {% for role in ['ADMIN','SALESMAN','SUBSALESMAN','CLIENT'] %}
+              <option value="{{ role }}">{{ role }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Temporary Password</label>
+            <input class="form-control" type="text" name="password" value="Welcome123" />
+          </div>
+          <button class="btn btn-primary" type="submit">Create</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Team Directory</h5>
+        <ul class="list-group">
+          {% for u in users %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>
+              <strong>{{ u.name }}</strong><br />
+              <small>{{ u.email }}</small>
+            </div>
+            <span class="badge bg-secondary">{{ u.role }}</span>
+          </li>
+          {% else %}
+          <li class="list-group-item">No users</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

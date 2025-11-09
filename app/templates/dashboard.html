@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+<div class="row g-3">
+  <div class="col-md-3">
+    <div class="card text-bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Revenue MTD</h5>
+        <p class="card-text fs-4">${{ '%.2f'|format(mtd.total) }}</p>
+        <small>{{ mtd.orders }} orders</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Revenue YTD</h5>
+        <p class="card-text fs-4">${{ '%.2f'|format(ytd.total) }}</p>
+        <small>{{ ytd.orders }} orders</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Inactive Stores 30d</h5>
+        <p class="card-text fs-4">{{ inactive|length }}</p>
+        <small>Follow up soon</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-bg-info">
+      <div class="card-body">
+        <h5 class="card-title">Category Mix</h5>
+        {% for category, percent in category_mix.items() %}
+        <div class="d-flex justify-content-between"><span>{{ category }}</span><span>{{ percent }}%</span></div>
+        {% else %}
+        <p class="mb-0">No data</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-6">
+    <h3>Inactive Stores (30d)</h3>
+    <ul class="list-group">
+      {% for store in inactive %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ store.display_name }} - {{ store.city }}, {{ store.province }}
+        <span class="badge bg-secondary">{{ store.last_order_date or 'No orders' }}</span>
+      </li>
+      {% else %}
+      <li class="list-group-item">All stores are active.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <h3>Top Products</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr><th>Product</th><th>Revenue</th><th>Quantity</th></tr>
+      </thead>
+      <tbody>
+        {% for row in top_products %}
+        <tr><td>{{ row.product }}</td><td>${{ '%.2f'|format(row.revenue) }}</td><td>{{ row.quantity }}</td></tr>
+        {% else %}
+        <tr><td colspan="3">No data</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
