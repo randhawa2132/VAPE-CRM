@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">Reports</h1>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Monthly Spending by Store</h5>
+        <table class="table table-sm">
+          <thead><tr><th>Store</th><th>Month</th><th>Total</th><th>Orders</th></tr></thead>
+          <tbody>
+            {% for row in monthly %}
+            <tr><td>{{ row.store }}</td><td>{{ row.month }}</td><td>${{ '%.2f'|format(row.total) }}</td><td>{{ row.orders }}</td></tr>
+            {% else %}
+            <tr><td colspan="4">No data</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Province Breakdown</h5>
+        <table class="table table-sm">
+          <thead><tr><th>Province</th><th>Stores</th><th>Total</th></tr></thead>
+          <tbody>
+            {% for row in province %}
+            <tr><td>{{ row.province }}</td><td>{{ row.stores }}</td><td>${{ '%.2f'|format(row.total) }}</td></tr>
+            {% else %}
+            <tr><td colspan="3">No data</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3 mt-1">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Inactive Stores (30d)</h5>
+        <ul class="list-group">
+          {% for store in inactive %}
+          <li class="list-group-item d-flex justify-content-between">
+            {{ store.display_name }}
+            <span class="badge bg-secondary">{{ store.last_order_date or 'No orders' }}</span>
+          </li>
+          {% else %}
+          <li class="list-group-item">No inactive stores 🎉</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Top Products</h5>
+        <table class="table table-sm">
+          <thead><tr><th>Product</th><th>Revenue</th><th>Quantity</th></tr></thead>
+          <tbody>
+            {% for row in top_products %}
+            <tr><td>{{ row.product }}</td><td>${{ '%.2f'|format(row.revenue) }}</td><td>{{ row.quantity }}</td></tr>
+            {% else %}
+            <tr><td colspan="3">No data</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

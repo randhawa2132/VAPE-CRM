@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">Import WooCommerce Orders</h1>
+<p class="text-muted">Upload the CSV export from WooCommerce to sync orders.</p>
+<form method="post" enctype="multipart/form-data" class="mb-4">
+  <div class="input-group">
+    <input class="form-control" type="file" name="file" accept=".csv" required />
+    <button class="btn btn-primary" type="submit">Upload</button>
+  </div>
+</form>
+{% if summary %}
+<div class="alert alert-info">
+  <strong>Import Summary:</strong>
+  <ul class="mb-0">
+    <li>Inserted: {{ summary.inserted }}</li>
+    <li>Updated: {{ summary.updated }}</li>
+    <li>Skipped: {{ summary.skipped }}</li>
+    <li>Unmatched (new leads): {{ summary.unmatched }}</li>
+  </ul>
+</div>
+{% endif %}
+{% endblock %}

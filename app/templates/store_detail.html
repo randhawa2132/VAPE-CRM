@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">{{ store.display_name }}</h1>
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Store Details</h5>
+        <p><strong>Status:</strong> {{ store.status }}</p>
+        <p><strong>Owner:</strong> {{ store.owner.name if store.owner else 'Unassigned' }}</p>
+        <p><strong>Sub-owner:</strong> {{ store.sub_owner.name if store.sub_owner else 'Unassigned' }}</p>
+        <p><strong>City:</strong> {{ store.city }}, {{ store.province }}</p>
+        <p><strong>Address:</strong> {{ store.address1 or '-' }}</p>
+        <p><strong>Last Order:</strong> {{ store.last_order_date or 'N/A' }}</p>
+      </div>
+    </div>
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="card-title">Update Status</h5>
+        <form method="post" action="/stores/{{ store.id }}/update">
+          <div class="mb-2">
+            <label class="form-label">Status</label>
+            <select class="form-select" name="status">
+              {% for option in ['LEAD','ACTIVE','DORMANT','CLOSED'] %}
+              <option value="{{ option }}" {% if option == store.status %}selected{% endif %}>{{ option }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" name="notes" rows="3">{{ store.notes or '' }}</textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Update</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Recent Orders</h5>
+        <table class="table">
+          <thead><tr><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td>{{ order.order_date.strftime('%Y-%m-%d') }}</td>
+              <td>{{ order.status }}</td>
+              <td>${{ '%.2f'|format(order.total) }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3">No orders yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
