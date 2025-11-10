@@ -2,8 +2,7 @@ import enum
 from datetime import datetime, date
 from typing import Optional
 
-from sqlalchemy import JSON, Column, Text, and_
-from sqlalchemy.orm import Mapped, foreign
+from sqlalchemy import JSON, Column, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -70,7 +69,7 @@ class StoreBase(SQLModel):
     longitude: Optional[float] = Field(default=None, index=True)
     google_place_id: Optional[str] = Field(default=None, index=True)
     status: StoreStatus = Field(default=StoreStatus.LEAD)
-    tags: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     notes: Optional[str] = None
     last_order_date: Optional[date] = Field(default=None, index=True)
 
@@ -170,8 +169,8 @@ class Activity(ActivityBase, table=True):
 
 class EmailRuleBase(SQLModel):
     trigger: EmailTrigger
-    to_emails: list[str] = Field(default_factory=list, sa_column=Column(JSON))
-    cc_emails: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    to_emails: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    cc_emails: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     active: bool = True
     template_name: str
 
