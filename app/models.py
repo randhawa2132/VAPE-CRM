@@ -1,9 +1,9 @@
-from __future__ import annotations
-
 import enum
 from datetime import datetime, date
-from typing import List, Optional
+from typing import Optional
 
+from sqlalchemy import JSON, Column, Text, and_
+from sqlalchemy.orm import Mapped, foreign
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -46,9 +46,13 @@ class User(UserBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    owned_stores: List["Store"] = Relationship(back_populates="owner", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"})
-    sub_owned_stores: List["Store"] = Relationship(back_populates="sub_owner", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"})
-    activities: List["Activity"] = Relationship(back_populates="actor")
+    owned_stores: Mapped[list["Store"]] = Relationship(
+        back_populates="owner", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"}
+    )
+    sub_owned_stores: Mapped[list["Store"]] = Relationship(
+        back_populates="sub_owner", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"}
+    )
+    activities: Mapped[list["Activity"]] = Relationship(back_populates="actor")
 
 
 class StoreBase(SQLModel):
@@ -66,7 +70,7 @@ class StoreBase(SQLModel):
     longitude: Optional[float] = Field(default=None, index=True)
     google_place_id: Optional[str] = Field(default=None, index=True)
     status: StoreStatus = Field(default=StoreStatus.LEAD)
-    tags: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
+    tags: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     notes: Optional[str] = None
     last_order_date: Optional[date] = Field(default=None, index=True)
 
@@ -78,10 +82,13 @@ class Store(StoreBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    owner: Optional[User] = Relationship(back_populates="owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"})
-    sub_owner: Optional[User] = Relationship(back_populates="sub_owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"})
-    orders: List["Order"] = Relationship(back_populates="store")
-    activities: List["Activity"] = Relationship(back_populates="store")
+    owner: Mapped[Optional[User]] = Relationship(
+        back_populates="owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"}
+    )
+    sub_owner: Mapped[Optional[User]] = Relationship(
+        back_populates="sub_owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"}
+    )
+    orders: Mapped[list["Order"]] = Relationship(back_populates="store")
 
 
 class OrderBase(SQLModel):
@@ -96,7 +103,7 @@ class OrderBase(SQLModel):
     total: float
     payment_method: Optional[str] = None
     status: Optional[str] = None
-    raw_import_payload: Optional[str] = Field(default=None, sa_column_kwargs={"type_": "TEXT"})
+    raw_import_payload: Optional[str] = Field(default=None, sa_column=Column(Text))
 
 
 class Order(OrderBase, table=True):
@@ -105,9 +112,8 @@ class Order(OrderBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    store: Optional[Store] = Relationship(back_populates="orders")
-    items: List["OrderItem"] = Relationship(back_populates="order")
-    activities: List["Activity"] = Relationship(back_populates="order")
+    store: Mapped[Optional[Store]] = Relationship(back_populates="orders")
+    items: Mapped[list["OrderItem"]] = Relationship(back_populates="order")
 
 
 class OrderItemBase(SQLModel):
@@ -126,14 +132,14 @@ class OrderItem(OrderItemBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     order_id: int = Field(foreign_key="order.id")
 
-    order: Order = Relationship(back_populates="items")
+    order: Mapped[Order] = Relationship(back_populates="items")
 
 
 class ActivityBase(SQLModel):
     entity_type: ActivityEntityType
     entity_id: int
     action: str
-    metadata: Optional[str] = Field(default=None, sa_column_kwargs={"type_": "TEXT"})
+    details: Optional[str] = Field(default=None, sa_column=Column("metadata", Text))
 
 
 class Activity(ActivityBase, table=True):
@@ -141,15 +147,31 @@ class Activity(ActivityBase, table=True):
     actor_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    actor: Optional[User] = Relationship(back_populates="activities")
-    store: Optional[Store] = Relationship(sa_relationship_kwargs={"primaryjoin": "Activity.entity_id==Store.id", "foreign_keys": "Activity.entity_id"})
-    order: Optional[Order] = Relationship(sa_relationship_kwargs={"primaryjoin": "Activity.entity_id==Order.id", "foreign_keys": "Activity.entity_id"})
+    actor: Mapped[Optional[User]] = Relationship(back_populates="activities")
+    store: Mapped[Optional[Store]] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": lambda: and_(
+                foreign(Activity.entity_id) == Store.id,
+                Activity.entity_type == ActivityEntityType.STORE,
+            ),
+            "viewonly": True,
+        }
+    )
+    order: Mapped[Optional[Order]] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": lambda: and_(
+                foreign(Activity.entity_id) == Order.id,
+                Activity.entity_type == ActivityEntityType.ORDER,
+            ),
+            "viewonly": True,
+        }
+    )
 
 
 class EmailRuleBase(SQLModel):
     trigger: EmailTrigger
-    to_emails: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
-    cc_emails: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
+    to_emails: list[str] = Field(default_factory=list, sa_column=Column(JSON))
+    cc_emails: list[str] = Field(default_factory=list, sa_column=Column(JSON))
     active: bool = True
     template_name: str
 
