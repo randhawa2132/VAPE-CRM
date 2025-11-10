@@ -82,7 +82,7 @@ def record_activity(
         entity_type=entity_type,
         entity_id=entity_id,
         action=action,
-        metadata=metadata,
+        details=metadata,
     )
     session.add(activity)
     session.commit()
