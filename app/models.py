@@ -4,6 +4,7 @@ import enum
 from datetime import datetime, date
 from typing import List, Optional
 
+from sqlalchemy import JSON, Column, Text
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -66,7 +67,7 @@ class StoreBase(SQLModel):
     longitude: Optional[float] = Field(default=None, index=True)
     google_place_id: Optional[str] = Field(default=None, index=True)
     status: StoreStatus = Field(default=StoreStatus.LEAD)
-    tags: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
+    tags: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     notes: Optional[str] = None
     last_order_date: Optional[date] = Field(default=None, index=True)
 
@@ -96,7 +97,7 @@ class OrderBase(SQLModel):
     total: float
     payment_method: Optional[str] = None
     status: Optional[str] = None
-    raw_import_payload: Optional[str] = Field(default=None, sa_column_kwargs={"type_": "TEXT"})
+    raw_import_payload: Optional[str] = Field(default=None, sa_column=Column(Text))
 
 
 class Order(OrderBase, table=True):
@@ -133,7 +134,7 @@ class ActivityBase(SQLModel):
     entity_type: ActivityEntityType
     entity_id: int
     action: str
-    metadata: Optional[str] = Field(default=None, sa_column_kwargs={"type_": "TEXT"})
+    details: Optional[str] = Field(default=None, sa_column=Column("metadata", Text))
 
 
 class Activity(ActivityBase, table=True):
@@ -148,8 +149,8 @@ class Activity(ActivityBase, table=True):
 
 class EmailRuleBase(SQLModel):
     trigger: EmailTrigger
-    to_emails: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
-    cc_emails: List[str] = Field(default_factory=list, sa_column_kwargs={"type_": "JSON"})
+    to_emails: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    cc_emails: List[str] = Field(default_factory=list, sa_column=Column(JSON))
     active: bool = True
     template_name: str
 
