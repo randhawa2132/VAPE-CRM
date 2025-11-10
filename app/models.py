@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import enum
 from datetime import datetime, date
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy import JSON, Column, Text
 from sqlmodel import Field, Relationship, SQLModel
@@ -47,9 +45,13 @@ class User(UserBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    owned_stores: List["Store"] = Relationship(back_populates="owner", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"})
-    sub_owned_stores: List["Store"] = Relationship(back_populates="sub_owner", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"})
-    activities: List["Activity"] = Relationship(back_populates="actor")
+    owned_stores: Mapped[list["Store"]] = Relationship(
+        back_populates="owner", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"}
+    )
+    sub_owned_stores: Mapped[list["Store"]] = Relationship(
+        back_populates="sub_owner", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"}
+    )
+    activities: Mapped[list["Activity"]] = Relationship(back_populates="actor")
 
 
 class StoreBase(SQLModel):
@@ -79,10 +81,13 @@ class Store(StoreBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    owner: Optional[User] = Relationship(back_populates="owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"})
-    sub_owner: Optional[User] = Relationship(back_populates="sub_owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"})
-    orders: List["Order"] = Relationship(back_populates="store")
-    activities: List["Activity"] = Relationship(back_populates="store")
+    owner: Mapped[Optional[User]] = Relationship(
+        back_populates="owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"}
+    )
+    sub_owner: Mapped[Optional[User]] = Relationship(
+        back_populates="sub_owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"}
+    )
+    orders: Mapped[list["Order"]] = Relationship(back_populates="store")
 
 
 class OrderBase(SQLModel):
@@ -106,9 +111,8 @@ class Order(OrderBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    store: Optional[Store] = Relationship(back_populates="orders")
-    items: List["OrderItem"] = Relationship(back_populates="order")
-    activities: List["Activity"] = Relationship(back_populates="order")
+    store: Mapped[Optional[Store]] = Relationship(back_populates="orders")
+    items: Mapped[list["OrderItem"]] = Relationship(back_populates="order")
 
 
 class OrderItemBase(SQLModel):
@@ -127,7 +131,7 @@ class OrderItem(OrderItemBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     order_id: int = Field(foreign_key="order.id")
 
-    order: Order = Relationship(back_populates="items")
+    order: Mapped[Order] = Relationship(back_populates="items")
 
 
 class ActivityBase(SQLModel):
@@ -142,9 +146,25 @@ class Activity(ActivityBase, table=True):
     actor_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    actor: Optional[User] = Relationship(back_populates="activities")
-    store: Optional[Store] = Relationship(sa_relationship_kwargs={"primaryjoin": "Activity.entity_id==Store.id", "foreign_keys": "Activity.entity_id"})
-    order: Optional[Order] = Relationship(sa_relationship_kwargs={"primaryjoin": "Activity.entity_id==Order.id", "foreign_keys": "Activity.entity_id"})
+    actor: Mapped[Optional[User]] = Relationship(back_populates="activities")
+    store: Mapped[Optional[Store]] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": lambda: and_(
+                foreign(Activity.entity_id) == Store.id,
+                Activity.entity_type == ActivityEntityType.STORE,
+            ),
+            "viewonly": True,
+        }
+    )
+    order: Mapped[Optional[Order]] = Relationship(
+        sa_relationship_kwargs={
+            "primaryjoin": lambda: and_(
+                foreign(Activity.entity_id) == Order.id,
+                Activity.entity_type == ActivityEntityType.ORDER,
+            ),
+            "viewonly": True,
+        }
+    )
 
 
 class EmailRuleBase(SQLModel):
