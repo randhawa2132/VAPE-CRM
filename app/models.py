@@ -75,13 +75,11 @@ class Store(StoreBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     owner_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     sub_owner_user_id: Optional[int] = Field(default=None, foreign_key="user.id")
-    franchise_id: Optional[int] = Field(default=None, foreign_key="franchise.id")
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
     owner: Optional[User] = Relationship(back_populates="owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.owner_user_id"})
     sub_owner: Optional[User] = Relationship(back_populates="sub_owned_stores", sa_relationship_kwargs={"foreign_keys": "Store.sub_owner_user_id"})
-    franchise: Optional["Franchise"] = Relationship(back_populates="stores")
     orders: List["Order"] = Relationship(back_populates="store")
     activities: List["Activity"] = Relationship(back_populates="store")
 
@@ -160,59 +158,3 @@ class EmailRule(EmailRuleBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-
-
-class FranchiseBase(SQLModel):
-    name: str = Field(index=True, unique=True)
-    color_hex: str = Field(default="#6c757d")
-    description: Optional[str] = None
-
-
-class Franchise(FranchiseBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-
-    stores: List[Store] = Relationship(back_populates="franchise")
-
-
-class RouteStatus(str, enum.Enum):
-    DRAFT = "DRAFT"
-    CONFIRMED = "CONFIRMED"
-
-
-class RouteBase(SQLModel):
-    name: str
-    status: RouteStatus = Field(default=RouteStatus.DRAFT)
-    planned_date: Optional[date] = None
-    created_by_user_id: int = Field(foreign_key="user.id")
-    assigned_user_id: int = Field(foreign_key="user.id")
-    notes: Optional[str] = None
-    total_distance_km: float = 0.0
-    total_travel_minutes: float = 0.0
-
-
-class Route(RouteBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-
-    created_by: User = Relationship(sa_relationship_kwargs={"foreign_keys": "Route.created_by_user_id"})
-    assigned_user: User = Relationship(sa_relationship_kwargs={"foreign_keys": "Route.assigned_user_id"})
-    stops: List["RouteStop"] = Relationship(back_populates="route", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
-
-
-class RouteStopBase(SQLModel):
-    sequence: int
-    store_id: int = Field(foreign_key="store.id")
-    comments: Optional[str] = None
-    travel_distance_km: float = 0.0
-    travel_minutes: float = 0.0
-
-
-class RouteStop(RouteStopBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    route_id: int = Field(foreign_key="route.id")
-
-    route: Route = Relationship(back_populates="stops")
-    store: Store = Relationship()

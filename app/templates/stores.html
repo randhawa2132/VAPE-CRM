@@ -15,7 +15,6 @@
       <th>Province</th>
       <th>Owner</th>
       <th>Sub-owner</th>
-      <th>Franchise</th>
       <th>Last Order</th>
     </tr>
   </thead>
@@ -28,18 +27,11 @@
       <td>{{ store.province }}</td>
       <td>{{ store.owner.name if store.owner else '-' }}</td>
       <td>{{ store.sub_owner.name if store.sub_owner else '-' }}</td>
-      <td>
-        {% if store.franchise %}
-        <span class="badge" style="background-color: {{ store.franchise.color_hex }};">{{ store.franchise.name }}</span>
-        {% else %}
-        Independent
-        {% endif %}
-      </td>
       <td>{{ store.last_order_date or 'N/A' }}</td>
     </tr>
     {% else %}
     <tr>
-      <td colspan="8">No stores found.</td>
+      <td colspan="7">No stores found.</td>
     </tr>
     {% endfor %}
   </tbody>

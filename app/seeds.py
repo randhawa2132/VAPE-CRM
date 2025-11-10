@@ -8,31 +8,13 @@ from sqlmodel import Session, select
 
 from .auth import get_password_hash
 from .database import engine, init_db
-from .models import (
-    EmailRule,
-    EmailTrigger,
-    Franchise,
-    Order,
-    OrderItem,
-    Route,
-    Store,
-    StoreStatus,
-    User,
-    UserRole,
-)
-from .services.routes import rebuild_route_stops
+from .models import EmailRule, EmailTrigger, Order, OrderItem, Store, StoreStatus, User, UserRole
 from .settings import settings
 
 fake = Faker("en_CA")
 
 PROVINCES = ["AB", "BC", "ON", "QC"]
 CATEGORIES = ["Disposable", "E-Liquid", "Pod", "Accessory"]
-FRANCHISES = [
-    ("VapeWave Collective", "#8b5cf6", "Urban storefronts across Western Canada"),
-    ("Northern Clouds", "#0ea5e9", "Family-owned franchise with strong loyalty programs"),
-    ("Prairie Vapor", "#f97316", "High-volume retailers along the Trans-Canada"),
-    ("Coastal Mist", "#10b981", "BC-based experiential lounges and boutiques"),
-]
 
 
 def create_user(session: Session, name: str, email: str, role: UserRole) -> User:
@@ -56,18 +38,6 @@ def seed() -> None:
         if session.exec(select(Store)).first():
             return
 
-        franchises = []
-        for name, color, description in FRANCHISES:
-            existing_franchise = session.exec(select(Franchise).where(Franchise.name == name)).first()
-            if existing_franchise:
-                franchises.append(existing_franchise)
-                continue
-            franchise = Franchise(name=name, color_hex=color, description=description)
-            session.add(franchise)
-            session.commit()
-            session.refresh(franchise)
-            franchises.append(franchise)
-
         stores: list[Store] = []
         for _ in range(100):
             owner = random.choice(salesmen)
@@ -79,7 +49,6 @@ def seed() -> None:
             )[0]
             city = fake.city()
             province = random.choice(PROVINCES)
-            franchise_choice = random.choice(franchises + [None, None]) if franchises else None
             store = Store(
                 display_name=fake.company(),
                 city=city,
@@ -93,7 +62,6 @@ def seed() -> None:
                 status=status,
                 owner_user_id=owner.id,
                 sub_owner_user_id=sub_owner.id,
-                franchise_id=franchise_choice.id if franchise_choice else None,
             )
             session.add(store)
             session.commit()
@@ -148,22 +116,6 @@ def seed() -> None:
         for trigger in EmailTrigger:
             rule = EmailRule(trigger=trigger, to_emails=[settings.default_admin_email], template_name="default")
             session.add(rule)
-        session.commit()
-
-        # Seed sample planned routes for quick demos
-        for salesman in salesmen:
-            assigned_stores = [store for store in stores if store.owner_user_id == salesman.id][:5]
-            if not assigned_stores:
-                continue
-            route = Route(
-                name=f"{salesman.name.split()[0]} Territory Tour",
-                planned_date=datetime.utcnow().date(),
-                created_by_user_id=admin.id,
-                assigned_user_id=salesman.id,
-                notes="Generated demo route for onboarding",
-            )
-            rebuild_route_stops(route, assigned_stores)
-            session.add(route)
         session.commit()
 
 

@@ -11,15 +11,6 @@
         <p><strong>Sub-owner:</strong> {{ store.sub_owner.name if store.sub_owner else 'Unassigned' }}</p>
         <p><strong>City:</strong> {{ store.city }}, {{ store.province }}</p>
         <p><strong>Address:</strong> {{ store.address1 or '-' }}</p>
-        <p><strong>Franchise:</strong>
-          {% if store.franchise %}
-          <span class="badge" style="background-color: {{ store.franchise.color_hex }};">
-            {{ store.franchise.name }}
-          </span>
-          {% else %}
-          Independent
-          {% endif %}
-        </p>
         <p><strong>Last Order:</strong> {{ store.last_order_date or 'N/A' }}</p>
       </div>
     </div>
@@ -38,15 +29,6 @@
           <div class="mb-2">
             <label class="form-label">Notes</label>
             <textarea class="form-control" name="notes" rows="3">{{ store.notes or '' }}</textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Franchise</label>
-            <select class="form-select" name="franchise_id">
-              <option value="">Independent</option>
-              {% for franchise in franchises %}
-              <option value="{{ franchise.id }}" {% if store.franchise and store.franchise.id == franchise.id %}selected{% endif %}>{{ franchise.name }}</option>
-              {% endfor %}
-            </select>
           </div>
           <button class="btn btn-primary" type="submit">Update</button>
         </form>

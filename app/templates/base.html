@@ -30,10 +30,6 @@
             <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="/stores">Stores</a></li>
             <li class="nav-item"><a class="nav-link" href="/stores/map">Map</a></li>
-            {% if user and user.role in ['ADMIN', 'SALESMAN', 'SUBSALESMAN'] %}
-            <li class="nav-item"><a class="nav-link" href="/routes">Routes</a></li>
-            {% endif %}
-            <li class="nav-item"><a class="nav-link" href="/franchises">Franchises</a></li>
             <li class="nav-item"><a class="nav-link" href="/orders/import">Orders</a></li>
             <li class="nav-item"><a class="nav-link" href="/reports">Reports</a></li>
             {% if user and user.role == 'ADMIN' %}

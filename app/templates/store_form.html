@@ -11,14 +11,6 @@
       <label class="form-label">Legal Name</label>
       <input class="form-control" type="text" name="legal_name" />
     </div>
-    <div class="col-md-3">
-      <label class="form-label">Phone</label>
-      <input class="form-control" type="text" name="phone" />
-    </div>
-    <div class="col-md-3">
-      <label class="form-label">Email</label>
-      <input class="form-control" type="email" name="email" />
-    </div>
     <div class="col-md-4">
       <label class="form-label">City</label>
       <input class="form-control" type="text" name="city" required />
@@ -30,18 +22,6 @@
     <div class="col-md-4">
       <label class="form-label">Address</label>
       <input class="form-control" type="text" name="address1" />
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Address 2</label>
-      <input class="form-control" type="text" name="address2" />
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Postal Code</label>
-      <input class="form-control" type="text" name="postal_code" />
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Country</label>
-      <input class="form-control" type="text" name="country" value="Canada" />
     </div>
     <div class="col-md-6">
       <label class="form-label">Owner</label>
@@ -58,15 +38,6 @@
         <option value="">Select sub-owner</option>
         {% for sub in subs %}
         <option value="{{ sub.id }}">{{ sub.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Franchise</label>
-      <select class="form-select" name="franchise_id">
-        <option value="">Independent</option>
-        {% for franchise in franchises %}
-        <option value="{{ franchise.id }}">{{ franchise.name }}</option>
         {% endfor %}
       </select>
     </div>

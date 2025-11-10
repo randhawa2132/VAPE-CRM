@@ -7,19 +7,13 @@ An internal CRM for vape distribution teams built with FastAPI, SQLModel, and Ji
 - Role-based access control for Admin, Salesman, Sub-Salesman, and Client users.
 - Store management with ownership assignments, pipeline statuses, activity logging, and notes.
 - Google Maps view with clustering, status-coloured markers, and quick-create workflow.
-- Territory route planning for Sales and Sub-Sales teams with automated stop optimisation, ownership handoffs, and visit notes.
 - WooCommerce CSV ingestion with fuzzy store matching, duplicate prevention, item parsing, and summary reporting.
 - Dashboards for revenue KPIs, inactive store follow-ups, category mix, and top products.
 - Reporting tabs for monthly spend, provincial totals, inactive stores, and product leaders.
-- Franchise management and analytics with colour-coded map overlays, aggregated KPIs, and top-performer insights.
 - Email automation rules (new store, inactivity, monthly summary) with SMTP integration or console mock.
-- Seed script that loads demo users, 100 Canadian stores (with franchise coverage), 12 months of synthetic orders, and pre-built sample routes.
+- Seed script that loads demo users, 100 Canadian stores, and 12 months of synthetic orders.
 
 ## Getting Started
-
-If you just want the TL;DR for spinning the CRM up on your laptop, jump to the
-[Localhost Deployment Quickstart](docs/LOCALHOST_DEPLOYMENT.md). The sections
-below walk through the same process in more detail.
 
 ### 1. Install dependencies
 
@@ -49,7 +43,7 @@ SMTP_FROM_EMAIL=crm@yourdomain.com
 python -m app.seeds
 ```
 
-This creates an admin (`admin@example.com` / `Welcome123`), three salesmen, five sub-salesmen, colour-coded franchise groups, geo-coded stores, demo routes, and a year of synthetic WooCommerce-style orders.
+This creates an admin (`admin@example.com` / `Welcome123`), three salesmen, five sub-salesmen, and populates stores plus orders.
 
 ### 4. Run the server
 
@@ -70,10 +64,6 @@ Browse to `http://localhost:8000/login` and sign in with one of the seeded accou
 
 The project includes a `/health` endpoint for uptime checks and deterministic seed data for demos. Use FastAPI's interactive docs at `/docs` for API exploration.
 
-## Deployment Notes
-
-- The dependency set is intentionally lightweight so the FastAPI app can be deployed to serverless providers such as Vercel without exceeding their 250 MB uncompressed bundle limits. If you need heavy analytics libraries (e.g., pandas, NumPy, scikit-learn), prefer offloading those workloads to background jobs or analytics pipelines instead of bundling them with the API service.
-
 ## Project Structure
 
 ```
@@ -85,7 +75,6 @@ app/
   services/
     importer.py       # WooCommerce CSV ingestion
     reports.py        # Dashboard/report aggregations
-    routes.py         # Route optimisation helpers and access checks
   utils/
     geocode.py        # Google geocoding helper
   email/

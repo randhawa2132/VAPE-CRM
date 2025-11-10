@@ -15,7 +15,7 @@
           <li><span class="legend-dot status-dormant"></span> Dormant</li>
           <li><span class="legend-dot status-closed"></span> Closed</li>
         </ul>
-        <p class="small text-muted">Franchise-assigned stores use their franchise color for quick visual grouping.</p>
+        <p class="small text-muted">Use the map to explore stores in your territory.</p>
       </div>
     </div>
   </div>
@@ -75,14 +75,13 @@
     const infoWindow = new google.maps.InfoWindow();
     const markers = data.features.map(feature => {
       const { coordinates } = feature.geometry;
-      const fillColor = feature.properties.franchise_color || statusColors[feature.properties.status] || 'gray';
       const marker = new google.maps.Marker({
         position: { lat: coordinates[1], lng: coordinates[0] },
         map,
         title: feature.properties.name,
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: fillColor,
+          fillColor: statusColors[feature.properties.status] || 'gray',
           fillOpacity: 0.9,
           strokeColor: 'white',
           strokeWeight: 1,
@@ -95,8 +94,7 @@
             <strong>${feature.properties.name}</strong><br />
             ${feature.properties.city}, ${feature.properties.province}<br />
             Status: ${feature.properties.status}<br />
-            Owner: ${feature.properties.owner || 'Unassigned'}<br />
-            Franchise: ${feature.properties.franchise || 'Independent'}
+            Owner: ${feature.properties.owner || 'Unassigned'}
           </div>
         `);
         infoWindow.open({ anchor: marker, map });
