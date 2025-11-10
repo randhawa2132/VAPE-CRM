@@ -4,7 +4,8 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List, Optional
 
-from pydantic import BaseSettings, EmailStr, Field, validator
+from pydantic import EmailStr, Field, validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
