@@ -6,9 +6,10 @@ from typing import Optional
 from fastapi import Depends, HTTPException, Request, status
 from itsdangerous import BadSignature, URLSafeTimedSerializer
 from passlib.context import CryptContext
+from sqlalchemy.exc import OperationalError
 from sqlmodel import Session, select
 
-from .database import get_session
+from .database import get_session, init_db
 from .models import Activity, ActivityEntityType, Store, User, UserRole
 from .settings import settings
 
@@ -62,7 +63,13 @@ def require_roles(*roles: UserRole):
 
 
 def authenticate_user(email: str, password: str, session: Session) -> Optional[User]:
-    user = session.exec(select(User).where(User.email == email)).first()
+    query = select(User).where(User.email == email)
+    try:
+        user = session.exec(query).first()
+    except OperationalError:
+        session.rollback()
+        init_db()
+        user = session.exec(query).first()
     if not user or not verify_password(password, user.password_hash):
         return None
     return user
