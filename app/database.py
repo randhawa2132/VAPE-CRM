@@ -16,7 +16,7 @@ def init_db() -> None:
 
 
 def get_session() -> Generator[Session, None, None]:
-    session = SessionLocal()
+    session = Session(engine)
     try:
         yield session
     finally:
