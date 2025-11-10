@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-3">Email Rules</h1>
+<div class="row">
+  <div class="col-md-5">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Create / Update Rule</h5>
+        <form method="post">
+          <div class="mb-2">
+            <label class="form-label">Trigger</label>
+            <select class="form-select" name="trigger">
+              {% for trigger in ['NEW_STORE_CREATED','INACTIVE_30D','MONTHLY_SUMMARY'] %}
+              <option value="{{ trigger }}">{{ trigger }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">To Emails (comma separated)</label>
+            <input class="form-control" type="text" name="to_emails" />
+          </div>
+          <div class="mb-2">
+            <label class="form-label">CC Emails</label>
+            <input class="form-control" type="text" name="cc_emails" />
+          </div>
+          <div class="form-check form-switch mb-2">
+            <input class="form-check-input" type="checkbox" role="switch" name="active" />
+            <label class="form-check-label">Active</label>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Template Name</label>
+            <input class="form-control" type="text" name="template_name" value="default" />
+          </div>
+          <button class="btn btn-primary" type="submit">Save Rule</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Existing Rules</h5>
+        <table class="table table-sm">
+          <thead><tr><th>Trigger</th><th>To</th><th>CC</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for rule in rules %}
+            <tr>
+              <td>{{ rule.trigger }}</td>
+              <td>{{ rule.to_emails | join(', ') }}</td>
+              <td>{{ rule.cc_emails | join(', ') }}</td>
+              <td>
+                {% if rule.active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-secondary">Disabled</span>{% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4">No rules configured.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

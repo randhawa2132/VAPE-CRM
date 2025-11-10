@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Route Planning</h1>
+  {% if can_create %}
+  <span class="text-muted">Optimize store visits and keep field teams aligned.</span>
+  {% endif %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Active Routes</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Assigned To</th>
+                <th>Planned Date</th>
+                <th>Status</th>
+                <th>Stops</th>
+                <th>Distance</th>
+                <th>Travel Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for route in routes %}
+              <tr>
+                <td><a href="/routes/{{ route.id }}">{{ route.name }}</a></td>
+                <td>{{ route.assigned_user.name }}</td>
+                <td>{{ route.planned_date or 'TBD' }}</td>
+                <td>
+                  <span class="badge bg-{{ 'success' if route.status == 'CONFIRMED' else 'secondary' }}">{{ route.status }}</span>
+                </td>
+                <td>{{ route.stops|length }}</td>
+                <td>{{ '%.1f km'|format(route.total_distance_km) }}</td>
+                <td>{{ '%.0f mins'|format(route.total_travel_minutes) }}</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="7">No routes created yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if can_create %}
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Create Optimized Route</h5>
+        <form method="post" action="/routes">
+          <div class="mb-3">
+            <label class="form-label">Route Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Prairie Blitz" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Planned Date</label>
+            <input type="date" name="planned_date" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Assign To</label>
+            <select class="form-select" name="assigned_user_id" required>
+              {% for teammate in assignable_users %}
+              <option value="{{ teammate.id }}">{{ teammate.name }} ({{ teammate.role }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Stores to Visit</label>
+            <select class="form-select" name="store_ids" multiple size="8" required>
+              {% for store in stores %}
+              <option value="{{ store.id }}">{{ store.display_name }} — {{ store.city }}, {{ store.province }}</option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Hold Ctrl/⌘ to select multiple stores. The system will determine the most efficient sequence.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Route Notes</label>
+            <textarea class="form-control" name="notes" rows="3" placeholder="Key objectives, samples to drop off, etc."></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Build Route</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

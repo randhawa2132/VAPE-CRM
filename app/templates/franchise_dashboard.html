@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Franchise Performance</h1>
+  <p class="text-muted mb-0">Compare franchise groups, highlight top performers, and spot at-risk partners.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Franchise Analytics</h5>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Franchise</th>
+                <th>Stores</th>
+                <th>Total Revenue</th>
+                <th>Orders</th>
+                <th>Avg Order</th>
+                <th>Inactive (30d)</th>
+                <th>Last Order</th>
+                <th>Top Store</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in overview %}
+              <tr>
+                <td>
+                  <span class="franchise-color" style="background-color: {{ row.color }}"></span>
+                  <strong>{{ row.name }}</strong><br />
+                  <span class="text-muted small">{{ row.description or 'No description' }}</span>
+                </td>
+                <td>{{ row.store_count }}</td>
+                <td>${{ '%.2f'|format(row.total_revenue) }}</td>
+                <td>{{ row.total_orders }}</td>
+                <td>${{ '%.2f'|format(row.avg_order_value) }}</td>
+                <td>{{ row.inactive_stores }}</td>
+                <td>{{ row.last_order_date or '—' }}</td>
+                <td>
+                  {% if row.top_store %}
+                  {{ row.top_store }}<br /><span class="text-muted small">${{ '%.2f'|format(row.top_store_revenue) }}</span>
+                  {% else %}
+                  —
+                  {% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="8">No franchise-linked stores yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if user.role == 'ADMIN' %}
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Manage Franchises</h5>
+        <form method="post" action="/franchises">
+          <div class="mb-3">
+            <label class="form-label">Update Existing</label>
+            <select class="form-select" name="franchise_id">
+              <option value="">Create new franchise</option>
+              {% for franchise in franchises %}
+              <option value="{{ franchise.id }}">{{ franchise.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Franchise Name</label>
+            <input type="text" class="form-control" name="name" placeholder="Northern Vapes Collective" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Map &amp; Dashboard Color</label>
+            <input type="color" class="form-control form-control-color" name="color_hex" value="#6c757d" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" rows="3" placeholder="Notes about revenue share, store standards, etc."></textarea>
+          </div>
+          <button class="btn btn-primary" type="submit">Save Franchise</button>
+          <div class="form-text mt-2">Pick an existing franchise to update its details or leave as new to add another group.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

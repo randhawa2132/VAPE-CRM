@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Stores</h1>
+  {% if user.role in ['ADMIN', 'SALESMAN'] %}
+  <a href="/stores/new" class="btn btn-primary">Add Store</a>
+  {% endif %}
+</div>
+<table class="table table-hover align-middle">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Status</th>
+      <th>City</th>
+      <th>Province</th>
+      <th>Owner</th>
+      <th>Sub-owner</th>
+      <th>Franchise</th>
+      <th>Last Order</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for store in stores %}
+    <tr>
+      <td><a href="/stores/{{ store.id }}">{{ store.display_name }}</a></td>
+      <td><span class="badge bg-{{ 'primary' if store.status == 'LEAD' else 'success' if store.status == 'ACTIVE' else 'warning' if store.status == 'DORMANT' else 'danger' }}">{{ store.status }}</span></td>
+      <td>{{ store.city }}</td>
+      <td>{{ store.province }}</td>
+      <td>{{ store.owner.name if store.owner else '-' }}</td>
+      <td>{{ store.sub_owner.name if store.sub_owner else '-' }}</td>
+      <td>
+        {% if store.franchise %}
+        <span class="badge" style="background-color: {{ store.franchise.color_hex }};">{{ store.franchise.name }}</span>
+        {% else %}
+        Independent
+        {% endif %}
+      </td>
+      <td>{{ store.last_order_date or 'N/A' }}</td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="8">No stores found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
